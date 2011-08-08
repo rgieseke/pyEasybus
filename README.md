@@ -1,6 +1,7 @@
 # Python Interface for Easybus Devices.
 
 2010-2011 Robert Gieseke - robert.gieseke@gmail.com
+
 MIT license, see LICENSE.
 
 ### Example usage:
