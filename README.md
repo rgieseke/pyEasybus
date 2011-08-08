@@ -20,6 +20,7 @@ Easybus devices.
 
 ### Manual for check-sum code:
 "EASYBUS Schnittstelle ohne DLL, 12.12.2007" (German)
+
 <http://www.greisinger.de/files/upload/de/downloads/dokumente/EASYBUS%20Schnittstelle%20ohne%20DLL.pdf>
 
 E.A.S.Y.Bus and the EASYBus Logo is a trademark or registered trademark of GREISINGER electronic GmbH.
