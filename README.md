@@ -2,7 +2,7 @@
 
 2010-2011 Robert Gieseke - robert.gieseke@gmail.com
 
-MIT license, see LICENSE.
+Apache License, Version 2.0, see LICENSE.
 
 ### Example usage:
 
