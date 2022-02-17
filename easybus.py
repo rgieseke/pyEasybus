@@ -4,7 +4,15 @@
 Python Interface for Easybus Devices.
 
 2010-2011 Robert Gieseke - robert.gieseke@gmail.com
+2022 Christian Sadeler (Update to Python 3)
+
+Contains conversion code from pyeasyb
+(https://github.com/TheUncleKai/pyeasyb)
+Copyright (C) 2017, Kai Raphahn <kai.raphahn@laburec.de>
+
 See LICENSE
+
+Tested with GMH3750 thermometer, python 3.9.7 and serial 3.5
 
 Example usage:
 
