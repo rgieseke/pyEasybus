@@ -152,8 +152,6 @@ class Easybus(serial.Serial):
         byte0 = self.channel(address)
         crc_byte = self.crc(byte0, command)
         request = (byte0, command, crc_byte)
-        # request = (byte0, command, crc_byte)
-        # request = (0xFE, 0x00, 0x3D)
         self.write(request)
         response = self.read(9)
         if response == '':
@@ -195,15 +193,11 @@ class Easybus(serial.Serial):
         byte4 = 0
         crc_byte_2 = self.crc(byte0, byte1)
         crc_byte_5 = self.crc(byte3, byte4)
-        # request = "".join([chr(item) for item in [byte0, byte1, crc_byte_2,
-        #                                           byte3, byte4, crc_byte_5]])
         request = (byte0, byte1, crc_byte_2, byte3, byte4, crc_byte_5)
         self.write(request)
         response = self.read(9)
         highbyte = response[6]
         lowbyte = response[7]
-        # highbyte = int(response[6].encode('hex'), 16)
-        # lowbyte = int(response[7].encode('hex'), 16)
         int_dat = 0
         int_dat = int_dat | (highbyte ^ 255)
         int_dat = int_dat << 8
