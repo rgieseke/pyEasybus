@@ -4,7 +4,7 @@
 
 2022 Christian Sadeler (Update to Python 3)
 
-Contains conversion code from [pyeasyb](https://github.com/TheUncleKai/pyeasyb)
+Contains conversion code from [pyeasyb](https://github.com/TheUncleKai/pyeasyb):
 
 Copyright (C) 2017, Kai Raphahn <kai.raphahn@laburec.de>
 
