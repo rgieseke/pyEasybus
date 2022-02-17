@@ -4,16 +4,27 @@
 Python Interface for Easybus Devices.
 
 2010-2011 Robert Gieseke - robert.gieseke@gmail.com
+2022 Christian Sadeler (Update to Python 3)
+
+Contains conversion code from pyeasyb
+(https://github.com/TheUncleKai/pyeasyb)
+Copyright (C) 2017, Kai Raphahn <kai.raphahn@laburec.de>
+
 See LICENSE
+
+Tested with GMH3750 thermometer, python 3.9.7 and serial 3.5
 
 Example usage:
 
     from easybus import Easybus
-    thermometer = Easybus('COM1')
-    print thermometer.value()
+    thermometer = Easybus('COM4')
+    print(thermometer.value())
+    print(thermometer.display_unit())
 """
 
 import serial
+import sys
+
 
 class Easybus(serial.Serial):
     def __init__(self, com_port):
@@ -21,7 +32,7 @@ class Easybus(serial.Serial):
         Initialise EASYBUS device.
 
             Example:
-            thermometer = Easybus('COM1')
+            thermometer = Easybus('COM4')
         """
         serial.Serial.__init__(self, com_port)
         self.baudrate = 4800
@@ -35,7 +46,7 @@ class Easybus(serial.Serial):
                           16363: 'Error 7: system error',
                           16364: 'Error 8: battery empty',
                           16365: 'Error 9: sensor defective',
-                         }
+                          }
         self.unit_nrs = {1: u'°C',
                          2: u'°F',
                          3: 'K',
@@ -97,7 +108,7 @@ class Easybus(serial.Serial):
                          175: 'dB',
                          176: 'dBm',
                          177: 'dBA',
-                        }
+                         }
 
     def channel(self, address):
         """
@@ -124,30 +135,60 @@ class Easybus(serial.Serial):
         """
         Return displayed measuring value.
         """
+        def decode_u16(bytea: int, byteb: int) -> int:
+            data = (255 - bytea) << 8
+            data = data | byteb
+            return data
+
+        def decode_u32(inputa: int, inputb: int) -> int:
+            data = (inputa << 16) | inputb
+            return data
+
+        def crop_u32(value: int) -> int:
+            size = sys.getsizeof(value)
+            result = value
+
+            if size > 32:
+                result = value & 0x00000000ffffffff
+            return result
+
+        def to_signed32(value):
+            value = value & 0xffffffff
+            return (value ^ 0x80000000) - 0x80000000
+
         command = 0
         byte0 = self.channel(address)
         crc_byte = self.crc(byte0, command)
-        request = chr(byte0) + chr(command) + chr(crc_byte)
+        request = (byte0, command, crc_byte)
         self.write(request)
-        response = self.read(6)
+        response = self.read(9)
         if response == '':
             return "Error: No value read."
-        byte3 = int(response[3].encode('hex'), 16)
-        byte4 = int(response[4].encode('hex'), 16)
-        int_value = (16383 & ((256 * (255 - byte3)) + byte4)) - 2048
-        if int_value >= 16532:
-            return self.error_msg(int_value)
-        dec_point = 49152 & (256 * (255 - byte3))
-        if dec_point == 49152:
-            temp_value = int_value * 10**-3
-        elif dec_point == 32768:
-            temp_value = int_value * 10**-2
-        elif dec_point == 16384:
-            temp_value = int_value * 10**-1
-        elif dec_point == 0:
-            temp_value = int_value
+        byte3, byte4 = response[3], response[4]
+        byte6, byte7 = response[6], response[7]
+        u16_integer1 = decode_u16(byte3, byte4)
+        u16_integer2 = decode_u16(byte6, byte7)
+        u32_integer = decode_u32(u16_integer1, u16_integer2)
+
+        float_pos = 0xff - byte3
+        float_pos = (float_pos >> 3) - 15
+
+        u32_integer = crop_u32(u32_integer & 0x07ffffff)
+
+        if (100000000 + 0x2000000) > u32_integer:
+            compare = crop_u32(u32_integer & 0x04000000)
+
+            if 0x04000000 == compare:
+                u32_integer = crop_u32(u32_integer | 0xf8000000)
+
+            u32_integer = crop_u32(u32_integer + 0x02000000)
         else:
-            temp_value = False
+            error_num = u32_integer - 0x02000000 - 100000000
+            return self.error_msg(error_num)
+
+        i32_integer = to_signed32(u32_integer)
+        temp_value = float(i32_integer) / float(float(10.0) ** float_pos)
+
         return temp_value
 
     def display_unit(self, address=1):
@@ -160,12 +201,11 @@ class Easybus(serial.Serial):
         byte4 = 0
         crc_byte_2 = self.crc(byte0, byte1)
         crc_byte_5 = self.crc(byte3, byte4)
-        request = "".join([chr(item) for item in [byte0, byte1, crc_byte_2,
-                                                  byte3, byte4, crc_byte_5]])
+        request = (byte0, byte1, crc_byte_2, byte3, byte4, crc_byte_5)
         self.write(request)
         response = self.read(9)
-        highbyte = int(response[6].encode('hex'), 16)
-        lowbyte = int(response[7].encode('hex'), 16)
+        highbyte = response[6]
+        lowbyte = response[7]
         int_dat = 0
         int_dat = int_dat | (highbyte ^ 255)
         int_dat = int_dat << 8
