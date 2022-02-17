@@ -4,8 +4,7 @@
 
 2022 Christian Sadeler (Update to Python 3)
 
-Contains conversion code from pyeasyb
-(https://github.com/TheUncleKai/pyeasyb)
+Contains conversion code from [pyeasyb](https://github.com/TheUncleKai/pyeasyb)
 Copyright (C) 2017, Kai Raphahn <kai.raphahn@laburec.de>
 
 Apache license, see LICENSE.
@@ -17,15 +16,16 @@ Apache license, see LICENSE.
     print(thermometer.value())
 
 ### Requirements:
-pySerial - <http://pyserial.sourceforge.net/>
+pySerial - <https://github.com/pyserial/pyserial/>
 
 ### Note:
 Note that this has only been tested with Easybus connected thermometers,
 however, other units are already included, making it easy to extend for other
 Easybus devices.
-Tested with GMH3750 thermometer with python 3.9.7 and serial 3.5
+Tested with GMH3750 thermometer with Python 3.9.7 and [pySerial](https://github.com/pyserial/pyserial) 3.5
 
 ### Manual for check-sum code:
+(Used in the original Python2 version)
 "EASYBUS Schnittstelle ohne DLL, 12.12.2007" (German)
 
 <http://www.greisinger.de/files/upload/de/downloads/dokumente/EASYBUS%20Schnittstelle%20ohne%20DLL.pdf>
